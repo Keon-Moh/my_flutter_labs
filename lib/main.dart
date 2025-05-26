@@ -141,14 +141,6 @@ class _MyHomePageState extends State<MyHomePage> {
             radius: 60,
             backgroundImage: AssetImage(imagePath),
           ),
-          Container(
-            width: 120,
-            height: 120,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: Colors.black.withOpacity(0.4),
-            ),
-          ),
           Text(
             label,
             style: const TextStyle(
