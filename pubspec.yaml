@@ -78,7 +78,17 @@ flutter:
   #     fonts:
   assets:
   - images/Beef.jpg
+  - images/Brownies.jpg
   - images/Chicken.jpg
+  - images/Cookies.jpg
+  - images/Crockpot.jpg
+  - images/IceCream.jpg
+  - images/MainDishes.jpg
+  - images/Pies.jpg
+  - images/Pork.jpg
+  - images/Salad.jpg
+  - images/Seafood.jpg
+  - images/SideDishes.jpg
 
   #   - family: Trajan Pro
   #     fonts:
