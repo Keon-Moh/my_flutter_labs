@@ -53,9 +53,12 @@ class _MyHomePageState extends State<MyHomePage> {
                       TextStyle(fontSize: 35, fontWeight: FontWeight.bold),
                     ),
                     SizedBox(height: 50),
-                    Text(
-                      "Not sure about exactly which recipe you're looking for? Do a search, or dive into our most popular categories",
-                      style: TextStyle(fontSize: 16),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        "Not sure about exactly which recipe you're looking for? Do a search, or dive into our most popular categories",
+                        style: TextStyle(fontSize: 16),
+                      ),
                     ),
                   ],
                 ),
@@ -91,7 +94,7 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
             ),
 
-            // By Course images (image + label below)
+            // By Course images (image + bottom label overlay)
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
@@ -111,7 +114,7 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
             ),
 
-            // By Dessert images (image + label below)
+            // By Dessert images (image + bottom label overlay)
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
@@ -162,25 +165,41 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-  // Image with label below, no overlay
+  // Image with bottom-centered text overlay
   Widget belowCategoryImage(String imagePath, String label) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        CircleAvatar(
-          radius: 60,
-          backgroundImage: AssetImage(imagePath),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          label,
-          style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
+    return SizedBox(
+      width: 120,
+      height: 120,
+      child: Stack(
+        alignment: Alignment.bottomCenter,
+        children: [
+          CircleAvatar(
+            radius: 60,
+            backgroundImage: AssetImage(imagePath),
           ),
-          textAlign: TextAlign.center,
-        ),
-      ],
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.only(bottom: 8),
+            alignment: Alignment.bottomCenter,
+            child: Text(
+              label,
+              style: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+                shadows: [
+                  Shadow(
+                    blurRadius: 3,
+                    color: Colors.black87,
+                    offset: Offset(0, 0),
+                  ),
+                ],
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
