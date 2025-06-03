@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:encrypted_shared_preferences/encrypted_shared_preferences.dart';
 
 void main() {
   runApp(const MyApp());
@@ -10,7 +11,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Lab 2 Login Page',
+      title: 'Lab 4 Login Page',
       debugShowCheckedModeBanner: false,
       home: const LoginPage(),
     );
@@ -25,17 +26,81 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  // Text controllers
   late TextEditingController _loginController;
   late TextEditingController _passwordController;
 
-  // Initial image
   String imageSource = 'images/question-mark.jpg';
 
-  // Button click handler
-  void _handleLogin() {
-    String password = _passwordController.text;
+  @override
+  void initState() {
+    super.initState();
+    _loginController = TextEditingController();
+    _passwordController = TextEditingController();
+    _loadLoginInfo();
+  }
 
+  // Load saved login and password if available
+  void _loadLoginInfo() async {
+    EncryptedSharedPreferences prefs = EncryptedSharedPreferences();
+    String? savedLogin = await prefs.getString("LoginName");
+    String? savedPassword = await prefs.getString("Password");
+
+    if (savedLogin.isNotEmpty && savedPassword.isNotEmpty) {
+      setState(() {
+        _loginController.text = savedLogin;
+        _passwordController.text = savedPassword;
+      });
+
+      // Show snackbar after build
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Previous login loaded.")),
+        );
+      });
+    }
+  }
+
+  // Show dialog to save or discard login info
+  void _handleLogin() async {
+    String password = _passwordController.text;
+    String loginName = _loginController.text;
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text("Save Login Info"),
+          content: const Text("Would you like to save your login and password for next time?"),
+          actions: [
+            TextButton(
+              onPressed: () async {
+                EncryptedSharedPreferences prefs = EncryptedSharedPreferences();
+                await prefs.setString("LoginName", loginName);
+                await prefs.setString("Password", password);
+
+                Navigator.of(context).pop(); // Close dialog
+                _updateImage(password);
+              },
+              child: const Text("Yes"),
+            ),
+            TextButton(
+              onPressed: () async {
+                EncryptedSharedPreferences prefs = EncryptedSharedPreferences();
+                await prefs.clear();
+
+                Navigator.of(context).pop(); // Close dialog
+                _updateImage(password);
+              },
+              child: const Text("No"),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  // Determine which image to show based on password
+  void _updateImage(String password) {
     setState(() {
       if (password == 'QWERTY123') {
         imageSource = 'images/light-bulb.jpg';
@@ -43,13 +108,6 @@ class _LoginPageState extends State<LoginPage> {
         imageSource = 'images/stop-sign.jpg';
       }
     });
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _loginController = TextEditingController();
-    _passwordController = TextEditingController();
   }
 
   @override
@@ -74,7 +132,7 @@ class _LoginPageState extends State<LoginPage> {
             const SizedBox(height: 10),
             TextField(
               controller: _passwordController,
-              obscureText: true, // <-- This hides password
+              obscureText: true,
               decoration: const InputDecoration(labelText: 'Password'),
             ),
             const SizedBox(height: 20),
