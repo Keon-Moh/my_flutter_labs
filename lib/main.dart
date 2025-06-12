@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:encrypted_shared_preferences/encrypted_shared_preferences.dart';
+import 'data_repository.dart';
+import 'profilepage.dart';
 
 void main() {
   runApp(const MyApp());
@@ -11,7 +12,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Lab 4 Login Page',
+      title: 'Lab 5 Login Page',
       debugShowCheckedModeBanner: false,
       home: const LoginPage(),
     );
@@ -26,88 +27,47 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  late TextEditingController _loginController;
-  late TextEditingController _passwordController;
-
-  String imageSource = 'images/question-mark.jpg';
+  final TextEditingController _loginController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    _loginController = TextEditingController();
-    _passwordController = TextEditingController();
-    _loadLoginInfo();
-  }
-
-  // Load saved login and password if available
-  void _loadLoginInfo() async {
-    EncryptedSharedPreferences prefs = EncryptedSharedPreferences();
-    String? savedLogin = await prefs.getString("LoginName");
-    String? savedPassword = await prefs.getString("Password");
-
-    if (savedLogin.isNotEmpty && savedPassword.isNotEmpty) {
-      setState(() {
-        _loginController.text = savedLogin;
-        _passwordController.text = savedPassword;
-      });
-
-      // Show snackbar after build
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Previous login loaded.")),
-        );
-      });
-    }
-  }
-
-  // Show dialog to save or discard login info
-  void _handleLogin() async {
-    String password = _passwordController.text;
-    String loginName = _loginController.text;
-
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text("Save Login Info"),
-          content: const Text("Would you like to save your login and password for next time?"),
-          actions: [
-            TextButton(
-              onPressed: () async {
-                EncryptedSharedPreferences prefs = EncryptedSharedPreferences();
-                await prefs.setString("LoginName", loginName);
-                await prefs.setString("Password", password);
-
-                Navigator.of(context).pop(); // Close dialog
-                _updateImage(password);
-              },
-              child: const Text("Yes"),
-            ),
-            TextButton(
-              onPressed: () async {
-                EncryptedSharedPreferences prefs = EncryptedSharedPreferences();
-                await prefs.clear();
-
-                Navigator.of(context).pop(); // Close dialog
-                _updateImage(password);
-              },
-              child: const Text("No"),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  // Determine which image to show based on password
-  void _updateImage(String password) {
-    setState(() {
-      if (password == 'QWERTY123') {
-        imageSource = 'images/light-bulb.jpg';
-      } else {
-        imageSource = 'images/stop-sign.jpg';
-      }
+    // Load saved data at startup
+    DataRepository.loadData().then((_) {
+      // Set login field from loaded data
+      _loginController.text = DataRepository.loginName;
+      // Optional: set password field if you saved it (not recommended for security)
+      setState(() {});
     });
+  }
+
+  void _handleLogin() {
+    final loginName = _loginController.text.trim();
+    final password = _passwordController.text;
+
+    if (password == 'QWERTY123') {
+      // Save loginName in repo and prefs
+      DataRepository.loginName = loginName;
+      DataRepository.saveData();
+
+      // Navigate to profile page and show snackbar
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const ProfilePage()),
+      ).then((_) {
+        // Optional: do something on return
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Welcome Back $loginName')),
+      );
+    } else {
+      // Wrong password
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Wrong Password')),
+      );
+    }
   }
 
   @override
@@ -127,7 +87,7 @@ class _LoginPageState extends State<LoginPage> {
           children: [
             TextField(
               controller: _loginController,
-              decoration: const InputDecoration(labelText: 'Login name'),
+              decoration: const InputDecoration(labelText: 'Login Name'),
             ),
             const SizedBox(height: 10),
             TextField(
@@ -139,13 +99,6 @@ class _LoginPageState extends State<LoginPage> {
             ElevatedButton(
               onPressed: _handleLogin,
               child: const Text('Login'),
-            ),
-            const SizedBox(height: 20),
-            Image.asset(
-              imageSource,
-              width: 300,
-              height: 300,
-              fit: BoxFit.cover,
             ),
           ],
         ),
