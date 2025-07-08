@@ -7,6 +7,8 @@ void main() {
 
 // Root widget of the application
 class MyApp extends StatelessWidget {
+  const MyApp({super.key}); // Use super parameter for key
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -29,11 +31,13 @@ class ShoppingItem {
 
 // Stateful widget to manage the shopping list state
 class ListPage extends StatefulWidget {
+  const ListPage({super.key}); // Use super parameter for key
+
   @override
-  _ListPageState createState() => _ListPageState();
+  ListPageState createState() => ListPageState();
 }
 
-class _ListPageState extends State<ListPage> {
+class ListPageState extends State<ListPage> {
   // List to hold shopping items
   List<ShoppingItem> shoppingList = [];
 
@@ -54,10 +58,7 @@ class _ListPageState extends State<ListPage> {
               Expanded(
                 child: TextField(
                   controller: nameController,
-                  decoration: InputDecoration(
-                    hintText: 'Item name',
-                    border: OutlineInputBorder(),
-                  ),
+                  decoration: InputDecoration(hintText: 'Item name'),
                 ),
               ),
               SizedBox(width: 8),
@@ -65,10 +66,7 @@ class _ListPageState extends State<ListPage> {
               Expanded(
                 child: TextField(
                   controller: quantityController,
-                  decoration: InputDecoration(
-                    hintText: 'Quantity',
-                    border: OutlineInputBorder(),
-                  ),
+                  decoration: InputDecoration(hintText: 'Quantity'),
                   keyboardType: TextInputType.number,
                 ),
               ),
@@ -133,18 +131,19 @@ class _ListPageState extends State<ListPage> {
                 // Display each item
                 child: Container(
                   alignment: Alignment.center,
-                  padding: EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+                  padding: EdgeInsets.symmetric(vertical: 4),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      // Item name with row number
+                      // Item name
                       Text(
                         "${index + 1}: ${shoppingList[index].name}, ",
                         style: TextStyle(fontSize: 16),
                       ),
-                      // Item quantity, placed beside name
+                      SizedBox(width: 10),
+                      // Item quantity
                       Text(
-                        "Quantity: ${shoppingList[index].quantity}",
+                        "quantity: ${shoppingList[index].quantity}",
                         style: TextStyle(fontSize: 16),
                       ),
                     ],
