@@ -96,7 +96,7 @@ class _$AppDatabase extends AppDatabase {
       },
       onCreate: (database, version) async {
         await database.execute(
-            'CREATE TABLE IF NOT EXISTS `ShoppingItem` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT NOT NULL, `quantity` TEXT NOT NULL)');
+            'CREATE TABLE IF NOT EXISTS `ShoppingItem` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `name` TEXT NOT NULL, `quantity` TEXT NOT NULL)');
 
         await callback?.onCreate?.call(database, version);
       },
@@ -114,7 +114,7 @@ class _$ShoppingDao extends ShoppingDao {
   _$ShoppingDao(
     this.database,
     this.changeListener,
-  )   : _queryAdapter = QueryAdapter(database),
+  )   : _queryAdapter = QueryAdapter(database, changeListener),
         _shoppingItemInsertionAdapter = InsertionAdapter(
             database,
             'ShoppingItem',
@@ -122,7 +122,8 @@ class _$ShoppingDao extends ShoppingDao {
                   'id': item.id,
                   'name': item.name,
                   'quantity': item.quantity
-                }),
+                },
+            changeListener),
         _shoppingItemDeletionAdapter = DeletionAdapter(
             database,
             'ShoppingItem',
@@ -131,7 +132,8 @@ class _$ShoppingDao extends ShoppingDao {
                   'id': item.id,
                   'name': item.name,
                   'quantity': item.quantity
-                });
+                },
+            changeListener);
 
   final sqflite.DatabaseExecutor database;
 
@@ -146,8 +148,17 @@ class _$ShoppingDao extends ShoppingDao {
   @override
   Future<List<ShoppingItem>> findAllShoppingItems() async {
     return _queryAdapter.queryList('SELECT * FROM ShoppingItem',
-        mapper: (Map<String, Object?> row) => ShoppingItem(row['id'] as int,
+        mapper: (Map<String, Object?> row) => ShoppingItem(row['id'] as int?,
             row['name'] as String, row['quantity'] as String));
+  }
+
+  @override
+  Stream<List<ShoppingItem>> findAllShoppingItemsAsStream() {
+    return _queryAdapter.queryListStream('SELECT * FROM ShoppingItem',
+        mapper: (Map<String, Object?> row) => ShoppingItem(row['id'] as int?,
+            row['name'] as String, row['quantity'] as String),
+        queryableName: 'ShoppingItem',
+        isView: false);
   }
 
   @override
